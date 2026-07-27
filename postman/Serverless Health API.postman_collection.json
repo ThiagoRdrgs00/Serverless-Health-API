@@ -1,0 +1,100 @@
+{
+  "info": {
+    "name": "Serverless Health API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Listar Agendas",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/agendas",
+          "host": ["{{baseUrl}}"],
+          "path": ["agendas"]
+        }
+      }
+    },
+    {
+      "name": "Criar Agendamento",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"agendamento\": {\n        \"medico_id\": 1,\n        \"paciente\": \"Carlos Almeida\",\n        \"data_horario\": \"2026-06-10 09:00\"\n    }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/agendamento",
+          "host": ["{{baseUrl}}"],
+          "path": ["agendamento"]
+        }
+      }
+    },
+    {
+      "name": "Criar Agendamento - Payload Invalido",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"agendamento\": {\n        \"medico_id\": \"1\",\n        \"paciente\": \"\",\n        \"data_horario\": \"10/06/2026 09:00\"\n    }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/agendamento",
+          "host": ["{{baseUrl}}"],
+          "path": ["agendamento"]
+        }
+      }
+    },
+    {
+      "name": "Triagem",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"sintomas\": \"Dor de cabeça forte há dois dias, sensibilidade à luz e náusea.\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/triagem",
+          "host": ["{{baseUrl}}"],
+          "path": ["triagem"]
+        }
+      }
+    },
+    {
+      "name": "Triagem - Payload Invalido",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"sintomas\": \"dor\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/triagem",
+          "host": ["{{baseUrl}}"],
+          "path": ["triagem"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/dev"
+    }
+  ]
+}

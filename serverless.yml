@@ -11,8 +11,11 @@ provider:
   timeout: 10
   environment:
     NODE_OPTIONS: '--enable-source-maps'
+    GEMINI_API_KEY: ${env:GEMINI_API_KEY, ''}
+    ANTHROPIC_API_KEY: ${env:ANTHROPIC_API_KEY, ''}
 
 plugins:
+  - serverless-dotenv-plugin
   - serverless-esbuild
   - serverless-offline
 
@@ -23,8 +26,6 @@ custom:
     sourcemap: true
     target: node20
     platform: node
-    format: esm
-    outputFileExtension: .mjs
 
 functions:
   api: ${file(serverless/functions/api.yml):api}

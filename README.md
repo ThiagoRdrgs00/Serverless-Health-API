@@ -2,12 +2,13 @@
 
 API serverless (AWS Lambda + API Gateway REST API) para consulta de agendas médicas e criação de agendamentos de consulta, construída com **Serverless Framework** e **TypeScript**. Dados mantidos em memória — sem banco de dados.
 
-**Stack:** Node.js 20+ / TypeScript (`strict`, ESM, sem `any`) · Serverless Framework v3 · serverless-offline + serverless-esbuild · Zod · Jest · ESLint + Prettier.
+**Stack:** Node.js 20+ / TypeScript (`strict`, CommonJS, sem `any`) · Serverless Framework v3 · serverless-offline + serverless-esbuild · Zod · Jest · ESLint + Prettier.
 
 ## Pré-requisitos
 
 - **Node.js 20+** e **npm**
 - Para fazer deploy real (opcional): uma **conta AWS** e credenciais configuradas localmente — ver seção [Deploy na AWS](#deploy-na-aws)
+- Para usar o endpoint `/triagem` (diferencial, opcional): uma chave de API do [Google AI Studio](https://aistudio.google.com/apikey) (Gemini, tier gratuito) — ver seção [`POST /triagem`](#post-triagem)
 
 ## Como rodar localmente
 
@@ -31,6 +32,8 @@ shared/          → composition root (injeção de dependência manual)
 ```
 
 Handlers são deliberadamente finos: extraem dados do evento, chamam o Use Case e formatam a resposta — nenhuma regra de negócio mora ali, o que torna os `Use Cases` testáveis com Jest puro, sem mockar AWS.
+
+Preocupações transversais (logging, tratamento de erro, validação) são encapsuladas como decorators/funções de ordem superior (`presentation/http/withLogging.ts`, `withErrorHandling.ts`, `withValidation.ts`) e um decorator de classe (`@logExecution`, em `shared/decorators/`) aplicado aos Use Cases.
 
 ## Endpoints
 
@@ -76,6 +79,37 @@ Retorna médicos e horários disponíveis. A disponibilidade é **calculada**, n
 
 A pasta [`postman/`](./postman) tem requisições `curl` prontas para importar no Postman (sucesso, conflito, payload inválido) — ver [`postman/README.md`](./postman/README.md).
 
+### `POST /triagem` (diferencial)
+
+Recebe a descrição de sintomas em texto livre e sugere uma especialidade médica, usando uma LLM com *structured outputs* (schema `zod`, garantindo que a especialidade sempre venha de uma lista fechada). **Não é diagnóstico** — apenas uma sugestão de triagem inicial.
+
+`ITriagemService` (`domain/services/`) tem **duas implementações prontas**, trocáveis em uma linha (`shared/container/services.ts`), sem tocar Use Case, rota ou testes:
+
+| Implementação | Modelo | Custo |
+|---|---|---|
+| `GeminiTriagemService` (ativa por padrão) | `gemini-3.5-flash` | Tier gratuito, sem cartão de crédito |
+| `AnthropicTriagemService` (alternativa) | `claude-haiku-4-5` | Pago (créditos mínimos na conta) |
+
+**Setup:** copie `.env.example` para `.env` e preencha `GEMINI_API_KEY` com uma chave gerada em [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
+
+**Request**
+
+```json
+{ "sintomas": "Dor forte no peito, falta de ar e palpitações há duas horas" }
+```
+
+| Status | Quando | Corpo |
+|---|---|---|
+| **200** | Sucesso | `{ "especialidade_sugerida": "Cardiologista", "justificativa": "..." }` |
+| **400** | `sintomas` ausente, vazio, ou fora do tamanho esperado (10–1000 caracteres) | `{ "erro": "Payload inválido", "mensagem": "..." }` |
+| **502** | Falha na chamada à API de IA (chave inválida, rate limit, indisponibilidade, recusa do modelo) | `{ "erro": "Triagem indisponível", "mensagem": "..." }` |
+
+## Diferenciais implementados
+
+- **Testes de integração** (`npm run test:integration`): invocam o `handler` da Lambda diretamente com eventos sintéticos — roteador, rotas, Use Cases e repositórios reais, sem mocks. Complementam os testes unitários (que mockam as dependências).
+- **Decorators**: ver seção [Arquitetura](#arquitetura) acima.
+- **Agente de IA** (`POST /triagem`): ver acima.
+
 ## Testes automatizados
 
 ```bash
@@ -85,6 +119,8 @@ npm run test:integration  # só os de integração
 ```
 
 Os **Use Cases** (regra de negócio) têm testes **unitários** isolados, mockando as interfaces de repositório. Além deles, `handler.integration.spec.ts` invoca o `handler` da Lambda diretamente com eventos sintéticos — roteador, rotas, Use Cases e repositórios reais, sem nenhum mock — cobrindo os mesmos cenários (200/201/400/404/409) de forma automatizada. Outros scripts úteis: `npm run typecheck`, `npm run lint`, `npm run format`.
+
+`TriarSintomasUseCase` (endpoint `/triagem`) só tem teste **unitário** (mockando `ITriagemService`) — deliberadamente sem teste de integração, já que isso chamaria uma API de IA de verdade a cada execução da suíte (não-determinismo desnecessário, e custo real caso a implementação ativa seja a paga).
 
 ## Deploy na AWS
 

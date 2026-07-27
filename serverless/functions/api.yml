@@ -14,3 +14,7 @@ api:
         path: /agendamento
         method: post
         cors: true
+    - http:
+        path: /triagem
+        method: post
+        cors: true

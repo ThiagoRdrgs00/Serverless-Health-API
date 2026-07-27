@@ -4,6 +4,7 @@ import { withErrorHandling } from '../../http/withErrorHandling';
 import { withLogging } from '../../http/withLogging';
 import { criarAgendamento } from './routes/criarAgendamento';
 import { listarAgendas } from './routes/listarAgendas';
+import { triagem } from './routes/triagem';
 
 async function router(
   event: APIGatewayProxyEvent,
@@ -16,6 +17,10 @@ async function router(
 
   if (httpMethod === 'POST' && path === '/agendamento') {
     return criarAgendamento(event);
+  }
+
+  if (httpMethod === 'POST' && path === '/triagem') {
+    return triagem(event);
   }
 
   return routeNotFound();

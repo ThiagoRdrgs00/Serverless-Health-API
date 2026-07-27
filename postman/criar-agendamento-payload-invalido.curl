@@ -1,9 +1,0 @@
-curl --location 'http://localhost:3000/dev/agendamento' \
---header 'Content-Type: application/json' \
---data '{
-    "agendamento": {
-        "medico_id": "1",
-        "paciente": "",
-        "data_horario": "10/06/2026 09:00"
-    }
-}'

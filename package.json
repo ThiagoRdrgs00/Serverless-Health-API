@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "API serverless (AWS Lambda + API Gateway) para consulta de agendas medicas e criacao de agendamentos, construida com Serverless Framework, TypeScript e Clean Architecture.",
   "main": "serverless.yml",
-  "type": "module",
   "engines": {
     "node": ">=20.0.0"
   },
@@ -31,6 +30,8 @@
   "author": "ThiagoRdrgs00",
   "license": "ISC",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
+    "@google/genai": "^2.13.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -46,6 +47,7 @@
     "jest": "^30.4.2",
     "prettier": "^3.9.6",
     "serverless": "^3.40.0",
+    "serverless-dotenv-plugin": "^6.0.0",
     "serverless-esbuild": "^1.57.2",
     "serverless-offline": "^13.10.1",
     "ts-jest": "^29.4.12",

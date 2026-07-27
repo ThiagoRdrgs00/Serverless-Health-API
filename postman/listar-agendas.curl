@@ -1,2 +1,0 @@
-curl --location 'http://localhost:3000/dev/agendas' \
---header 'Content-Type: application/json'

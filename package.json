@@ -1,0 +1,52 @@
+{
+  "name": "serverless-health-api",
+  "version": "1.0.0",
+  "description": "API serverless (AWS Lambda + API Gateway) para consulta de agendas medicas e criacao de agendamentos, construida com Serverless Framework, TypeScript e Clean Architecture.",
+  "main": "serverless.yml",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "offline": "serverless offline",
+    "deploy": "serverless deploy",
+    "remove": "serverless remove",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "serverless",
+    "aws-lambda",
+    "api-gateway",
+    "typescript",
+    "clean-architecture"
+  ],
+  "author": "ThiagoRdrgs00",
+  "license": "ISC",
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.162",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.1.1",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.65.0",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.8.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "jest": "^30.4.2",
+    "prettier": "^3.9.6",
+    "serverless": "^3.40.0",
+    "serverless-esbuild": "^1.57.2",
+    "serverless-offline": "^13.10.1",
+    "ts-jest": "^29.4.12",
+    "typescript": "^6.0.3"
+  }
+}

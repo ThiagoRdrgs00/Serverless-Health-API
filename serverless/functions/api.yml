@@ -1,0 +1,16 @@
+api:
+  handler: src/presentation/handlers/api/handler.handler
+  description: >
+    Handler unico com roteamento interno para /agendas e /agendamento.
+    Unificado para compartilhar o repositorio em memoria entre as duas
+    rotas (cada Lambda vira um bundle separado; sem isso o estado nao
+    seria compartilhado).
+  events:
+    - http:
+        path: /agendas
+        method: get
+        cors: true
+    - http:
+        path: /agendamento
+        method: post
+        cors: true

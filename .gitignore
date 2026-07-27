@@ -1,0 +1,25 @@
+# Dependências
+node_modules/
+
+# Build / bundle gerado pelo serverless-esbuild
+.esbuild/
+.build/
+.serverless/
+
+# Cobertura de testes
+coverage/
+
+# Variáveis de ambiente locais
+.env
+.env.local
+
+# Logs
+npm-debug.log*
+
+# Editor / SO
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Notas de estudo e preparacao pessoal (nao versionadas)
+docs/

@@ -8,7 +8,7 @@ API serverless (AWS Lambda + API Gateway REST API) para consulta de agendas méd
 
 - **Node.js 20+** e **npm**
 - Para fazer deploy real (opcional): uma **conta AWS** e credenciais configuradas localmente — ver seção [Deploy na AWS](#deploy-na-aws)
-- Para usar o endpoint `/triagem` (diferencial, opcional): uma chave de API do [Google AI Studio](https://aistudio.google.com/apikey) (Gemini, tier gratuito) — ver seção [`POST /triagem`](#post-triagem)
+- Para usar o endpoint `/triagem`: uma chave de API do [Google AI Studio](https://aistudio.google.com/apikey) (Gemini, tier gratuito) — ver seção [`POST /triagem`](#post-triagem)
 
 ## Como rodar localmente
 
@@ -21,8 +21,6 @@ O servidor sobe em `http://localhost:3000/dev`, simulando o API Gateway + Lambda
 
 ## Arquitetura
 
-Clean Architecture em camadas, com inversão de dependência (SOLID) entre elas:
-
 ```
 domain/          → entidades, erros tipados e interfaces de repositório (sem dependência externa)
 application/     → Use Cases (regra de negócio) e DTOs — dependem só de domain/
@@ -31,7 +29,7 @@ presentation/    → handler Lambda, roteador, validação e formatação HTTP
 shared/          → composition root (injeção de dependência manual)
 ```
 
-Handlers são deliberadamente finos: extraem dados do evento, chamam o Use Case e formatam a resposta — nenhuma regra de negócio mora ali, o que torna os `Use Cases` testáveis com Jest puro, sem mockar AWS.
+Handlers extraem dados do evento, chamam o Use Case e formatam a resposta — nenhuma regra de negócio mora ali, o que torna os `Use Cases` testáveis com Jest puro, sem mockar AWS.
 
 Preocupações transversais (logging, tratamento de erro, validação) são encapsuladas como decorators/funções de ordem superior (`presentation/http/withLogging.ts`, `withErrorHandling.ts`, `withValidation.ts`) e um decorator de classe (`@logExecution`, em `shared/decorators/`) aplicado aos Use Cases.
 
@@ -70,25 +68,25 @@ Retorna médicos e horários disponíveis. A disponibilidade é **calculada**, n
 }
 ```
 
-| Status | Quando | Corpo |
-|---|---|---|
-| **201** | Sucesso | `{ "mensagem": "Agendamento realizado com sucesso", "agendamento": { "id", "medico", "paciente", "data_horario" } }` |
-| **400** | Payload inválido (tipo errado, campo vazio, formato de data errado, ou horário fora da agenda do médico) | `{ "erro": "Payload inválido", "mensagem": "..." }` |
-| **404** | `medico_id` não existe | `{ "erro": "Médico não encontrado", "mensagem": "..." }` |
-| **409** | Horário já ocupado | `{ "erro": "Horário indisponível", "mensagem": "O horário solicitado não está mais disponível para este médico." }` |
+| Status  | Quando                                                                                                   | Corpo                                                                                                                |
+| ------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **201** | Sucesso                                                                                                  | `{ "mensagem": "Agendamento realizado com sucesso", "agendamento": { "id", "medico", "paciente", "data_horario" } }` |
+| **400** | Payload inválido (tipo errado, campo vazio, formato de data errado, ou horário fora da agenda do médico) | `{ "erro": "Payload inválido", "mensagem": "..." }`                                                                  |
+| **404** | `medico_id` não existe                                                                                   | `{ "erro": "Médico não encontrado", "mensagem": "..." }`                                                             |
+| **409** | Horário já ocupado                                                                                       | `{ "erro": "Horário indisponível", "mensagem": "O horário solicitado não está mais disponível para este médico." }`  |
 
-A pasta [`postman/`](./postman) tem requisições `curl` prontas para importar no Postman (sucesso, conflito, payload inválido) — ver [`postman/README.md`](./postman/README.md).
+A pasta [`postman/`](./postman) tem requisições prontas para importar no Postman (sucesso, conflito, payload inválido) — ver [`postman/README.md`](./postman/README.md).
 
 ### `POST /triagem` (diferencial)
 
-Recebe a descrição de sintomas em texto livre e sugere uma especialidade médica, usando uma LLM com *structured outputs* (schema `zod`, garantindo que a especialidade sempre venha de uma lista fechada). **Não é diagnóstico** — apenas uma sugestão de triagem inicial.
+Recebe a descrição de sintomas em texto livre e sugere uma especialidade médica, usando uma LLM com _structured outputs_ (schema `zod`, garantindo que a especialidade sempre venha de uma lista fechada). **Não é diagnóstico** — apenas uma sugestão de triagem inicial.
 
 `ITriagemService` (`domain/services/`) tem **duas implementações prontas**, trocáveis em uma linha (`shared/container/services.ts`), sem tocar Use Case, rota ou testes:
 
-| Implementação | Modelo | Custo |
-|---|---|---|
+| Implementação                             | Modelo             | Custo                                |
+| ----------------------------------------- | ------------------ | ------------------------------------ |
 | `GeminiTriagemService` (ativa por padrão) | `gemini-3.5-flash` | Tier gratuito, sem cartão de crédito |
-| `AnthropicTriagemService` (alternativa) | `claude-haiku-4-5` | Pago (créditos mínimos na conta) |
+| `AnthropicTriagemService` (alternativa)   | `claude-haiku-4-5` | Pago (créditos mínimos na conta)     |
 
 **Setup:** copie `.env.example` para `.env` e preencha `GEMINI_API_KEY` com uma chave gerada em [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
 
@@ -98,11 +96,11 @@ Recebe a descrição de sintomas em texto livre e sugere uma especialidade médi
 { "sintomas": "Dor forte no peito, falta de ar e palpitações há duas horas" }
 ```
 
-| Status | Quando | Corpo |
-|---|---|---|
-| **200** | Sucesso | `{ "especialidade_sugerida": "Cardiologista", "justificativa": "..." }` |
-| **400** | `sintomas` ausente, vazio, ou fora do tamanho esperado (10–1000 caracteres) | `{ "erro": "Payload inválido", "mensagem": "..." }` |
-| **502** | Falha na chamada à API de IA (chave inválida, rate limit, indisponibilidade, recusa do modelo) | `{ "erro": "Triagem indisponível", "mensagem": "..." }` |
+| Status  | Quando                                                                                         | Corpo                                                                   |
+| ------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **200** | Sucesso                                                                                        | `{ "especialidade_sugerida": "Cardiologista", "justificativa": "..." }` |
+| **400** | `sintomas` ausente, vazio, ou fora do tamanho esperado (10–1000 caracteres)                    | `{ "erro": "Payload inválido", "mensagem": "..." }`                     |
+| **502** | Falha na chamada à API de IA (chave inválida, rate limit, indisponibilidade, recusa do modelo) | `{ "erro": "Triagem indisponível", "mensagem": "..." }`                 |
 
 ## Diferenciais implementados
 

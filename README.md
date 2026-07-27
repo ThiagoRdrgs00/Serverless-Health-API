@@ -79,10 +79,12 @@ A pasta [`postman/`](./postman) tem requisições `curl` prontas para importar n
 ## Testes automatizados
 
 ```bash
-npm test
+npm test              # todos (unitários + integração)
+npm run test:unit      # só os unitários dos Use Cases
+npm run test:integration  # só os de integração
 ```
 
-Os **Use Cases** (regra de negócio) são testados isoladamente com Jest, mockando as interfaces de repositório. Outros scripts úteis: `npm run typecheck`, `npm run lint`, `npm run format`.
+Os **Use Cases** (regra de negócio) têm testes **unitários** isolados, mockando as interfaces de repositório. Além deles, `handler.integration.spec.ts` invoca o `handler` da Lambda diretamente com eventos sintéticos — roteador, rotas, Use Cases e repositórios reais, sem nenhum mock — cobrindo os mesmos cenários (200/201/400/404/409) de forma automatizada. Outros scripts úteis: `npm run typecheck`, `npm run lint`, `npm run format`.
 
 ## Deploy na AWS
 

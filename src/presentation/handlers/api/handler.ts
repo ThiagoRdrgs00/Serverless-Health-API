@@ -1,25 +1,24 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { handleError } from '../../http/handleError';
 import { routeNotFound } from '../../http/HttpResponse';
+import { withErrorHandling } from '../../http/withErrorHandling';
+import { withLogging } from '../../http/withLogging';
 import { criarAgendamento } from './routes/criarAgendamento';
 import { listarAgendas } from './routes/listarAgendas';
 
-export const handler = async (
+async function router(
   event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> => {
-  try {
-    const { httpMethod, path } = event;
+): Promise<APIGatewayProxyResult> {
+  const { httpMethod, path } = event;
 
-    if (httpMethod === 'GET' && path === '/agendas') {
-      return await listarAgendas();
-    }
-
-    if (httpMethod === 'POST' && path === '/agendamento') {
-      return await criarAgendamento(event);
-    }
-
-    return routeNotFound();
-  } catch (error) {
-    return handleError(error);
+  if (httpMethod === 'GET' && path === '/agendas') {
+    return listarAgendas();
   }
-};
+
+  if (httpMethod === 'POST' && path === '/agendamento') {
+    return criarAgendamento(event);
+  }
+
+  return routeNotFound();
+}
+
+export const handler = withLogging(withErrorHandling(router));

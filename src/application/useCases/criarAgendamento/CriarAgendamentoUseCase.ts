@@ -4,6 +4,7 @@ import { NotFoundError } from '../../../domain/errors/NotFoundError';
 import { ValidationError } from '../../../domain/errors/ValidationError';
 import { IAgendamentoRepository } from '../../../domain/repositories/IAgendamentoRepository';
 import { IMedicoRepository } from '../../../domain/repositories/IMedicoRepository';
+import { logExecution } from '../../../shared/decorators/logExecution';
 import {
   CriarAgendamentoInputDTO,
   CriarAgendamentoOutputDTO,
@@ -15,6 +16,7 @@ export class CriarAgendamentoUseCase {
     private readonly agendamentoRepository: IAgendamentoRepository,
   ) {}
 
+  @logExecution
   async execute(
     input: CriarAgendamentoInputDTO,
   ): Promise<CriarAgendamentoOutputDTO> {

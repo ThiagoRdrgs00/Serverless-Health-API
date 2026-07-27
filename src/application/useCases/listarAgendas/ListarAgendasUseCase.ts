@@ -1,5 +1,6 @@
 import { IAgendamentoRepository } from '../../../domain/repositories/IAgendamentoRepository';
 import { IMedicoRepository } from '../../../domain/repositories/IMedicoRepository';
+import { logExecution } from '../../../shared/decorators/logExecution';
 import { ListarAgendasOutputDTO } from '../../dtos/AgendaOutputDTO';
 
 export class ListarAgendasUseCase {
@@ -8,6 +9,7 @@ export class ListarAgendasUseCase {
     private readonly agendamentoRepository: IAgendamentoRepository,
   ) {}
 
+  @logExecution
   async execute(): Promise<ListarAgendasOutputDTO> {
     const medicos = await this.medicoRepository.findAll();
     const agendamentos = await this.agendamentoRepository.findAll();
